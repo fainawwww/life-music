@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Life Music | Живая музыка</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b0f1c 0%, #141b2b 100%);
+            min-height: 100vh;
+            color: #eef4ff;
+        }
+
+        .nav-bar {
+            background: rgba(18, 25, 45, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(72, 187, 255, 0.3);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-link {
+            color: #cbd5f0;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+        }
+
+        .nav-link:hover:not(.active) {
+            background: rgba(59,130,246,0.3);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 2rem 3rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .page.active-page {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #E0F2FE, #a5b4fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub {
+            color: #8f9bb5;
+            margin-bottom: 2rem;
+            border-left: 3px solid #3b82f6;
+            padding-left: 1rem;
+        }
+
+        .music-grid, .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.6rem;
+            margin-top: 1rem;
+        }
+
+        .track-card, .playlist-card {
+            background: rgba(20, 30, 55, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            padding: 1.2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(72, 187, 255, 0.2);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+        }
+
+        .track-card:hover, .playlist-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59,130,246,0.6);
+        }
+
+        .track-cover {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            background: #0a0f1c;
+            border: 1px solid #3b82f680;
+        }
+
+        .track-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        audio {
+            width: 100%;
+            margin: 12px 0;
+            border-radius: 40px;
+            background: #0f1422;
+        }
+
+        .delete-btn, .playlist-delete {
+            background: rgba(220, 38, 38, 0.75);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .add-form-card {
+            background: rgba(10, 16, 30, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(59,130,246,0.4);
+        }
+
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            color: #b9c7e6;
+        }
+
+        .input-field input, .input-field select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 60px;
+            border: 1px solid #2d3a5e;
+            background: #0a0f1c;
+            color: white;
+        }
+
+        .file-zone {
+            border: 2px dashed #3b82f6;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-add {
+            background: linear-gradient(95deg, #3b82f6, #8b5cf6);
+            border: none;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .empty-msg {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 2rem;
+            color: #8ca0c0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px dashed rgba(59,130,246,0.4);
+        }
+        
+        .empty-msg:hover {
+            background: rgba(59,130,246,0.15);
+            color: #b9e0ff;
+            transform: scale(1.01);
+            border-color: #3b82f6;
+        }
+
+        .info-message {
+            background: #1e293b;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid #3b82f6;
+            font-size: 0.9rem;
+        }
+
+        .playlist-selector {
+            background: #0f172a;
+            padding: 0.8rem;
+            border-radius: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mood-buttons-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0 12px 0;
+            justify-content: flex-start;
+        }
+
+        .mood-btn {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            padding: 8px 18px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #e2e8ff;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mood-btn:hover {
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            color: white;
+            transform: scale(1.02);
+            border-color: transparent;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #111827;
+            border-radius: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            border: 1px solid #3b82f6;
+        }
+
+        .modal-cover {
+            width: 100%;
+            max-width: 180px;
+            border-radius: 24px;
+            margin: 0 auto 15px;
+            display: block;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: 2px solid #facc15;
+        }
+
+        button.secondary {
+            background: #2d3a5e;
+            margin-top: 0.5rem;
+        }
+
+        .rec-track-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #0f172a;
+            padding: 10px 14px;
+            margin: 8px 0;
+            border-radius: 60px;
+            border-left: 4px solid #facc15;
+        }
+
+        @media (max-width: 680px) {
+            .container { padding: 1rem; }
+            .nav-bar { gap: 0.6rem; }
+            .nav-link { font-size: 0.9rem; padding: 0.3rem 0.8rem; }
+            .mood-buttons-bar { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav-bar">
+    <a href="#" data-page="player" class="nav-link active">🎵 Мои треки</a>
+    <a href="#" data-page="playlists" class="nav-link">📀 Мои плейлисты</a>
+    <a href="#" data-page="add" class="nav-link">➕ Добавить трек</a>
+</div>
+
+<div class="container">
+    <div id="playerPage" class="page active-page">
+        <div class="flex-between">
+            <div><h1>🎧 Музыкальная коллекция</h1><div class="sub">Треки хранятся в браузере</div></div>
+        </div>
+        <div class="mood-buttons-bar">
+            <button class="mood-btn" data-mood="recommendations">⭐ Наши рекомендации</button>
+            <button class="mood-btn" data-mood="calm">🌙 Для спокойного вечера</button>
+            <button class="mood-btn" data-mood="productive">⚡ Для продуктивного дня</button>
+            <button class="mood-btn" data-mood="morning">🌞 Для хорошего начала дня</button>
+        </div>
+        <div id="musicLibrary" class="music-grid"><div class="empty-msg">Загрузка...</div></div>
+    </div>
+
+    <div id="playlistsPage" class="page">
+        <div class="flex-between">
+            <div><h1>📀 Мои плейлисты</h1><div class="sub">Создавай свои плейлисты</div></div>
+            <button id="createPlaylistBtn" style="background:#3b82f6; border:none; padding:10px 20px; border-radius:40px; color:white; font-weight:bold; cursor:pointer;">+ Новый плейлист</button>
+        </div>
+        <div id="playlistsContainer" class="playlist-grid"><div class="empty-msg">Нет плейлистов. Создайте первый!</div></div>
+    </div>
+
+    <div id="addPage" class="page">
+        <h1>📂 Добавить аудиотрек</h1>
+        <div class="sub">Выбери файл, добавь обложку и название</div>
+        <div class="add-form-card">
+            <div class="form-group">
+                <div class="input-field"><label>🎵 Название трека</label><input type="text" id="trackName" placeholder="Название"></div>
+                <div class="input-field file-zone" id="audioDropZone"><label>🎤 Аудиофайл *</label>
+                    <button type="button" id="selectAudioBtn" style="background:#2d3a5e; border:none; padding:6px 12px; border-radius:40px; color:white;">Выбрать</button>
+                    <span id="audioFileName">Файл не выбран</span>
+                    <input type="file" id="audioFileInput" accept="audio/*" hidden>
+                </div>
+                <div class="input-field file-zone" id="coverDropZone"><label>🖼️ Обложка (опционально)</label>
+                    <button type="button" id="selectCoverBtn" style="background:#2d3a5e; border:none; padding:6px 12px; border-radius:40px; color:white;">Выбрать</button>
+                    <span id="coverFileName">Нет обложки</span>
+                    <input type="file" id="coverFileInput" accept="image/jpeg,image/png,image/webp" hidden>
+                    <div style="margin-top:8px;"><img id="coverPreview" style="max-width:60px; border-radius:12px; display:none;"></div>
+                </div>
+            </div>
+            <button id="submitTrackBtn" class="btn-add">💾 Сохранить трек в библиотеку</button>
+        </div>
+        <div class="info-message">💡 Обложка сохранится вместе с треком. После добавления вы сможете включать треки в плейлисты.</div>
+    </div>
+    <footer>🎶 Life Music — твои треки и плейлисты</footer>
+</div>
+
+<script>
+    let tracks = [];
+    let playlists = [];
+    const TRACKS_KEY = "life_music_tracks_v2";
+    const PLAYLISTS_KEY = "life_music_playlists_v2";
+
+    function loadData() {
+        const storedTracks = localStorage.getItem(TRACKS_KEY);
+        if(storedTracks) { try { tracks = JSON.parse(storedTracks); if(!Array.isArray(tracks)) tracks = []; } catch(e){ tracks=[]; } } else { tracks=[]; }
+        const storedPlaylists = localStorage.getItem(PLAYLISTS_KEY);
+        if(storedPlaylists) { try { playlists = JSON.parse(storedPlaylists); if(!Array.isArray(playlists)) playlists = []; } catch(e){ playlists=[]; } } else { playlists=[]; }
+    }
+    function saveTracks() { localStorage.setItem(TRACKS_KEY, JSON.stringify(tracks)); }
+    function savePlaylists() { localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists)); }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+        });
+    }
+    async function addTrack(audioFile, coverFile, customName) {
+        if(!audioFile) { alert("Выберите аудиофайл"); return false; }
+        let coverBase64 = null;
+        if(coverFile) {
+            if(!coverFile.type.startsWith('image/')) alert("Обложка должна быть изображением, пропускаем");
+            else coverBase64 = await fileToBase64(coverFile);
+        }
+        const audioBase64 = await fileToBase64(audioFile);
+        let trackName = customName.trim();
+        if(!trackName) trackName = audioFile.name.replace(/\.[^/.]+$/, "") || "Без названия";
+        const newTrack = {
+            id: Date.now() + Math.random() * 10000,
+            name: trackName,
+            fileDataBase64: audioBase64,
+            mimeType: audioFile.type,
+            coverBase64: coverBase64,
+            size: audioFile.size,
+            fileName: audioFile.name,
+            dateAdded: new Date().toISOString()
+        };
+        tracks.push(newTrack);
+        saveTracks();
+        return true;
+    }
+
+    function deleteTrackById(id) {
+        tracks = tracks.filter(t => t.id !== id);
+        playlists.forEach(pl => { pl.trackIds = pl.trackIds.filter(tid => tid !== id); });
+        saveTracks();
+        savePlaylists();
+        renderLibrary();
+        renderPlaylists();
+    }
+
+    function goToAddTrackPage() {
+        setActivePage('add');
+    }
+
+    function renderLibrary() {
+        const container = document.getElementById('musicLibrary');
+        if(!container) return;
+        if(!tracks.length) { 
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-msg';
+            emptyDiv.innerHTML = '🎵 Нет треков. Нажмите сюда, чтобы добавить музыку <br><span style="font-size:0.8rem;" </span>';
+            emptyDiv.style.cursor = 'pointer';
+            emptyDiv.addEventListener('click', goToAddTrackPage);
+            container.innerHTML = '';
+            container.appendChild(emptyDiv);
+            return; 
+        }
+        let html = '';
+        tracks.forEach(t => {
+            const coverImg = t.coverBase64 ? `<img class="track-cover" src="${t.coverBase64}" alt="обложка">` : `<div class="track-cover" style="background: linear-gradient(145deg,#1e2a3a,#0f172a); display:flex; align-items:center; justify-content:center; font-size:2rem;">🎵</div>`;
+            html += `<div class="track-card" data-id="${t.id}">
+                        ${coverImg}
+                        <div class="track-title"><span>${escapeHtml(t.name)}</span><span style="font-size:0.7rem;">${(t.size/1024/1024).toFixed(1)}МБ</span></div>
+                        <audio controls preload="metadata"><source src="${t.fileDataBase64}" type="${t.mimeType}"></audio>
+                        <div class="flex-between" style="margin-top:8px; gap:6px;">
+                            <button class="delete-btn" data-id="${t.id}" style="width:auto; flex:1;">🗑 Удалить</button>
+                            <button class="add-to-playlist-btn" data-id="${t.id}" style="background:#3b82f6; border:none; border-radius:40px; padding:6px; color:white; cursor:pointer; flex:1;">📀 В плейлист</button>
+                        </div>
+                    </div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.getAttribute('data-id')); if(confirm("Удалить трек?")) deleteTrackById(id); });
+        });
+        document.querySelectorAll('.add-to-playlist-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); const trackId = parseInt(btn.getAttribute('data-id')); showAddToPlaylistModal(trackId); });
+        });
+    }
+
+    function renderPlaylists() {
+        const container = document.getElementById('playlistsContainer');
+        if(!container) return;
+        if(!playlists.length) { container.innerHTML = `<div class="empty-msg">📀 Нет плейлистов. Создайте новый!</div>`; return; }
+        let html = '';
+        playlists.forEach(pl => {
+            const cover = pl.coverBase64 ? `<img class="track-cover" src="${pl.coverBase64}" alt="cover">` : `<div class="track-cover" style="background:radial-gradient(circle,#3b82f6,#a855f7); display:flex; align-items:center; justify-content:center; font-size:2rem;">🎧</div>`;
+            const trackCount = pl.trackIds.length;
+            html += `<div class="playlist-card" data-playlist-id="${pl.id}">
+                        ${cover}
+                        <div class="track-title">${escapeHtml(pl.name)}<span style="font-size:0.7rem;">${trackCount} треков</span></div>
+                        <div class="flex-between" style="gap:6px; margin-top:8px;">
+                            <button class="open-playlist-detail" data-id="${pl.id}" style="background:#2d3a5e; border:none; border-radius:40px; padding:6px; color:white; flex:1;">📋 Открыть</button>
+                            <button class="playlist-delete" data-id="${pl.id}" style="background:#dc2626; border:none; border-radius:40px; padding:6px; color:white; flex:1;">🗑 Удалить</button>
+                        </div>
+                    </div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.open-playlist-detail').forEach(btn => {
+            btn.addEventListener('click', () => { const id = parseInt(btn.getAttribute('data-id')); showPlaylistDetail(id); });
+        });
+        document.querySelectorAll('.playlist-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.getAttribute('data-id')); if(confirm("Удалить плейлист?")) deletePlaylist(id); });
+        });
+    }
+
+    function deletePlaylist(playlistId) {
+        playlists = playlists.filter(p => p.id !== playlistId);
+        savePlaylists();
+        renderPlaylists();
+    }
+
+    function showAddToPlaylistModal(trackId) {
+        if(playlists.length === 0) { alert("Нет плейлистов. Сначала создайте плейлист на вкладке 'Мои плейлисты'"); return; }
+        const selectHtml = `<select id="playlistSelect" style="width:100%; padding:10px; border-radius:40px; background:#1e293b; color:white; margin:12px 0;">${playlists.map(pl => `<option value="${pl.id}">${escapeHtml(pl.name)} (${pl.trackIds.length} треков)</option>`).join('')}</select>`;
+        const modal = document.createElement('div'); modal.className = 'modal-overlay active';
+        modal.innerHTML = `<div class="modal-content"><h3>Добавить трек в плейлист</h3>${selectHtml}<div class="flex-between" style="gap:8px; margin-top:12px;"><button id="confirmAddPlaylist" style="background:#3b82f6; padding:8px; border-radius:40px; border:none; color:white; flex:1;">Добавить</button><button id="cancelModalAdd" style="background:#475569; border:none; border-radius:40px; flex:1;">Отмена</button></div></div>`;
+        document.body.appendChild(modal);
+        const confirmBtn = modal.querySelector('#confirmAddPlaylist');
+        const cancelBtn = modal.querySelector('#cancelModalAdd');
+        const select = modal.querySelector('#playlistSelect');
+        confirmBtn.onclick = () => {
+            const playlistId = parseInt(select.value);
+            const playlist = playlists.find(p => p.id === playlistId);
+            if(playlist && !playlist.trackIds.includes(trackId)) {
+                playlist.trackIds.push(trackId);
+                savePlaylists();
+                alert(`Трек добавлен в плейлист "${playlist.name}"`);
+                renderPlaylists();
+            } else if(playlist && playlist.trackIds.includes(trackId)) alert("Этот трек уже есть в плейлисте");
+            modal.remove();
+        };
+        cancelBtn.onclick = () => modal.remove();
+        modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+    }
+
+    function showPlaylistDetail(playlistId) {
+        const playlist = playlists.find(p => p.id === playlistId);
+        if(!playlist) return;
+        const playlistTracks = tracks.filter(t => playlist.trackIds.includes(t.id));
+        const modal = document.createElement('div'); modal.className = 'modal-overlay active';
+        let tracksHtml = playlistTracks.length ? playlistTracks.map(tr => `<div style="background:#0f172a; border-radius:60px; padding:8px 12px; margin:8px 0; display:flex; justify-content:space-between; align-items:center;"><span><strong>${escapeHtml(tr.name)}</strong><br><small>${tr.fileName || ''}</small></span><button class="remove-from-playlist" data-trackid="${tr.id}" data-plid="${playlistId}" style="background:#ef4444; border:none; border-radius:40px; padding:4px 12px; color:white;">Убрать</button></div>`).join('') : '<div class="empty-msg" style="padding:1rem;">В плейлисте нет треков. Добавьте из раздела "Мои треки"</div>';
+        modal.innerHTML = `<div class="modal-content" style="max-width:550px;"><div style="display:flex; justify-content:space-between;"><h2>📀 ${escapeHtml(playlist.name)}</h2><button id="closeDetailModal" style="background:#1e293b; border:none; font-size:1.5rem; cursor:pointer;">✖</button></div><div id="playlistTracksList">${tracksHtml}</div></div>`;
+        document.body.appendChild(modal);
+        const closeBtn = modal.querySelector('#closeDetailModal');
+        closeBtn.onclick = () => modal.remove();
+        modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+        modal.querySelectorAll('.remove-from-playlist').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); const trackId = parseInt(btn.getAttribute('data-trackid')); const plId = parseInt(btn.getAttribute('data-plid')); const pl = playlists.find(p => p.id === plId); if(pl) { pl.trackIds = pl.trackIds.filter(id => id !== trackId); savePlaylists(); modal.remove(); showPlaylistDetail(plId); } });
+        });
+    }
+
+    function createPlaylistWithImage() {
+        const modal = document.createElement('div'); modal.className = 'modal-overlay active';
+        modal.innerHTML = `<div class="modal-content"><h3>➕ Новый плейлист</h3>
+            <div class="input-field"><label>Название плейлиста</label><input type="text" id="newPlaylistName" placeholder="Например: Для релакса"></div>
+            <div class="input-field file-zone" id="playlistCoverZone" style="margin-top:12px;"><label>🖼️ Обложка (фото/картинка)</label>
+                <button type="button" id="selectPlaylistCoverBtn" style="background:#2d3a5e; padding:6px 12px; border-radius:40px; border:none; color:white;">Выбрать фото</button>
+                <span id="playlistCoverName">Файл не выбран</span>
+                <input type="file" id="playlistCoverInput" accept="image/*" hidden>
+                <img id="playlistCoverPreview" style="max-width:80px; border-radius:16px; margin-top:6px; display:none;">
+            </div>
+            <div class="flex-between" style="margin-top:20px;"><button id="confirmCreatePlaylist" style="background:#3b82f6; border:none; padding:8px; border-radius:40px; color:white; flex:1;">Создать</button><button id="cancelCreatePlaylist" style="background:#475569; border:none; border-radius:40px; flex:1;">Отмена</button></div>
+        </div>`;
+        document.body.appendChild(modal);
+        let selectedCover = null;
+        const coverInput = modal.querySelector('#playlistCoverInput');
+        const selectCoverBtn = modal.querySelector('#selectPlaylistCoverBtn');
+        const coverNameSpan = modal.querySelector('#playlistCoverName');
+        const coverPreview = modal.querySelector('#playlistCoverPreview');
+        selectCoverBtn.onclick = () => coverInput.click();
+        coverInput.onchange = (e) => {
+            if(e.target.files.length) { selectedCover = e.target.files[0]; coverNameSpan.innerText = selectedCover.name; const reader = new FileReader(); reader.onload = (ev) => { coverPreview.src = ev.target.result; coverPreview.style.display = 'block'; }; reader.readAsDataURL(selectedCover); }
+        };
+        modal.querySelector('#confirmCreatePlaylist').onclick = async () => {
+            const nameInput = modal.querySelector('#newPlaylistName');
+            const name = nameInput.value.trim();
+            if(!name) { alert("Введите название плейлиста"); return; }
+            let coverBase64 = null;
+            if(selectedCover) coverBase64 = await fileToBase64(selectedCover);
+            const newPlaylist = { id: Date.now() + Math.random() * 10000, name: name, coverBase64: coverBase64, trackIds: [] };
+            playlists.push(newPlaylist);
+            savePlaylists();
+            renderPlaylists();
+            modal.remove();
+        };
+        modal.querySelector('#cancelCreatePlaylist').onclick = () => modal.remove();
+        modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+    }
+
+    const moodData = {
+        recommendations: {
+            title: "⭐ Наши рекомендации 2026",
+            coverPlaceholder: "🎵 ТОП-2026",
+            tracks: [
+                { name: "Neon Skies", artist: "Echo Valley & Luna Wave" },
+                { name: "Midnight Drive", artist: "The Voidwalkers" },
+                { name: "Golden Hour (Remix)", artist: "Sophia Chen" },
+                { name: "Echoes from the Future", artist: "Arcadia" },
+                { name: "Starlight Serenade", artist: "NOVA & The Cosmos" }
+            ]
+        },
+        calm: {
+            title: "🌙 Для спокойного вечера",
+            coverPlaceholder: "🎑 Вечерний джаз / Lo-fi",
+            tracks: [
+                { name: "Moonlight Sonata (Lofi)", artist: "Piano Chill" },
+                { name: "Silent Waves", artist: "Ambient Soul" },
+                { name: "Floating Through Stars", artist: "Ethereal" },
+                { name: "Rainy Window", artist: "Cozy Coffee" },
+                { name: "Deep Sleep Melody", artist: "Dreamweaver" }
+            ]
+        },
+        productive: {
+            title: "⚡ Для продуктивного дня",
+            coverPlaceholder: "💼 Фокус / Энергия",
+            tracks: [
+                { name: "Focus Flow", artist: "Work Tunes" },
+                { name: "Accelerate", artist: "Neural Drive" },
+                { name: "Deep Work", artist: "Algorithmic" },
+                { name: "Mission Peak", artist: "Synth Pulse" },
+                { name: "Laser Focus", artist: "Brain Booster" }
+            ]
+        },
+        morning: {
+            title: "🌞 Для хорошего начала дня",
+            coverPlaceholder: "☀️ Утренний позитив",
+            tracks: [
+                { name: "Sunrise Groove", artist: "Morning Vibes" },
+                { name: "Fresh Air", artist: "Daybreak" },
+                { name: "Happy Little Things", artist: "The Uplifters" },
+                { name: "Coffee & Beats", artist: "Barista Beats" },
+                { name: "New Day", artist: "Rising Soul" }
+            ]
+        }
+    };
+
+    function openMoodModal(moodKey) {
+        const data = moodData[moodKey];
+        if (!data) return;
+        const svgPlaceholder = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%233b425b'/%3E%3Ctext x='50%25' y='45%25' font-size='16' fill='%23ffd966' text-anchor='middle' dy='.3em'%3E🎵 ${encodeURIComponent(data.coverPlaceholder)}%3C/text%3E%3Ctext x='50%25' y='65%25' font-size='11' fill='%23b9c7e6' text-anchor='middle'%3E(нажмите, чтобы вставить фото)%3C/text%3E%3C/svg%3E`;
+        
+        const modal = document.createElement('div'); modal.className = 'modal-overlay active';
+        let tracksHtml = `<div style="margin-top:12px;"><h3 style="color:#facc15;">🎧 Подборка треков</h3>`;
+        data.tracks.forEach((tr, idx) => {
+            tracksHtml += `<div class="rec-track-item"><span style="font-weight:bold; min-width:35px;">#${idx+1}</span><div><strong>${escapeHtml(tr.name)}</strong><br><span style="font-size:0.75rem;">${escapeHtml(tr.artist)}</span></div></div>`;
+        });
+        tracksHtml += `</div><div class="info-message" style="margin-top:16px;">✨ Кликните по картинке выше, чтобы заменить на своё фото (обложка плейлиста)</div>`;
+        
+        modal.innerHTML = `<div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h2>${data.title}</h2>
+                <button id="closeMoodModal" style="background:#1e293b; border:none; font-size:1.8rem; cursor:pointer; width:36px; border-radius:50%;">&times;</button>
+            </div>
+            <div style="text-align:center;">
+                <img id="moodDynamicCover" src="${svgPlaceholder}" class="modal-cover" style="cursor:pointer; max-width:200px; border-radius:24px;">
+                <div class="image-label" style="font-size:0.7rem;">⬆️ Нажмите, чтобы заменить</div>
+            </div>
+            ${tracksHtml}
+        </div>`;
+        document.body.appendChild(modal);
+        
+        const closeBtn = modal.querySelector('#closeMoodModal');
+        closeBtn.onclick = () => modal.remove();
+        modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+        
+        const coverImg = modal.querySelector('#moodDynamicCover');
+        coverImg.addEventListener('click', () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/jpeg, image/png, image/webp';
+            fileInput.onchange = (event) => {
+                const file = event.target.files[0];
+                if(file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { coverImg.src = ev.target.result; };
+                    reader.readAsDataURL(file);
+                } else alert("Пожалуйста, выберите изображение");
+            };
+            fileInput.click();
+        });
+    }
+    let selectedAudioFile = null, selectedCoverFile = null;
+    function initAddForm() {
+        const audioInput = document.getElementById('audioFileInput');
+        const selectAudio = document.getElementById('selectAudioBtn');
+        const audioNameSpan = document.getElementById('audioFileName');
+        const coverInput = document.getElementById('coverFileInput');
+        const selectCover = document.getElementById('selectCoverBtn');
+        const coverNameSpan = document.getElementById('coverFileName');
+        const coverPreview = document.getElementById('coverPreview');
+        const trackNameInput = document.getElementById('trackName');
+        const submitBtn = document.getElementById('submitTrackBtn');
+        const audioZone = document.getElementById('audioDropZone');
+        const coverZone = document.getElementById('coverDropZone');
+
+        selectAudio.onclick = () => audioInput.click();
+        audioInput.onchange = (e) => { if(e.target.files[0]) { selectedAudioFile = e.target.files[0]; audioNameSpan.innerText = selectedAudioFile.name; if(!trackNameInput.value.trim()) trackNameInput.value = selectedAudioFile.name.replace(/\.[^/.]+$/, ""); } };
+        audioZone.ondragover = (e) => e.preventDefault();
+        audioZone.ondrop = (e) => { e.preventDefault(); if(e.dataTransfer.files[0]?.type.startsWith('audio/')) { selectedAudioFile = e.dataTransfer.files[0]; audioNameSpan.innerText = selectedAudioFile.name; if(!trackNameInput.value.trim()) trackNameInput.value = selectedAudioFile.name.replace(/\.[^/.]+$/, ""); } else alert("Требуется аудиофайл"); };
+        selectCover.onclick = () => coverInput.click();
+        coverInput.onchange = (e) => { if(e.target.files[0]) { selectedCoverFile = e.target.files[0]; coverNameSpan.innerText = selectedCoverFile.name; const reader = new FileReader(); reader.onload = (ev) => { coverPreview.src = ev.target.result; coverPreview.style.display = 'block'; }; reader.readAsDataURL(selectedCoverFile); } };
+        coverZone.ondragover = (e) => e.preventDefault();
+        coverZone.ondrop = (e) => { e.preventDefault(); if(e.dataTransfer.files[0]?.type.startsWith('image/')) { selectedCoverFile = e.dataTransfer.files[0]; coverNameSpan.innerText = selectedCoverFile.name; const reader = new FileReader(); reader.onload = (ev) => { coverPreview.src = ev.target.result; coverPreview.style.display = 'block'; }; reader.readAsDataURL(selectedCoverFile); } else alert("Загрузите изображение для обложки"); };
+        submitBtn.onclick = async () => {
+            if(!selectedAudioFile) { alert("Выберите аудиофайл"); return; }
+            const success = await addTrack(selectedAudioFile, selectedCoverFile, trackNameInput.value);
+            if(success) { alert("Трек сохранён с обложкой!"); selectedAudioFile = null; selectedCoverFile = null; audioInput.value = ''; coverInput.value = ''; audioNameSpan.innerText = "Файл не выбран"; coverNameSpan.innerText = "Нет обложки"; coverPreview.style.display = 'none'; trackNameInput.value = ''; renderLibrary(); setActivePage('player'); }
+            else alert("Ошибка");
+        };
+    }
+
+    function setActivePage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(pageId + 'Page').classList.add('active-page');
+        document.querySelectorAll('.nav-link').forEach(link => { link.classList.remove('active'); if(link.getAttribute('data-page') === pageId) link.classList.add('active'); });
+        if(pageId === 'player') renderLibrary();
+        if(pageId === 'playlists') renderPlaylists();
+    }
+
+    function initNavigation() {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => { e.preventDefault(); setActivePage(link.getAttribute('data-page')); });
+        });
+        document.getElementById('createPlaylistBtn')?.addEventListener('click', createPlaylistWithImage);
+        setActivePage('player');
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mood = btn.getAttribute('data-mood');
+                if(mood === 'recommendations') openMoodModal('recommendations');
+                else if(mood === 'calm') openMoodModal('calm');
+                else if(mood === 'productive') openMoodModal('productive');
+                else if(mood === 'morning') openMoodModal('morning');
+            });
+        });
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+    function init() {
+        loadData();
+        initNavigation();
+        initAddForm();
+        renderLibrary();
+        renderPlaylists();
+    }
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
