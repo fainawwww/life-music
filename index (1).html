@@ -16,50 +16,7 @@
       margin: 0;
       padding: 0;
     }
-     /* Кнопка удаления записи */
-    .service-item-profile {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .service-item-profile .service-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .delete-btn {
-      background: rgba(255, 80, 80, 0.15);
-      border: 1px solid rgba(255, 80, 80, 0.5);
-      color: #ff8b8b;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.3s;
-      flex-shrink: 0;
-    }
-
-    .delete-btn:hover {
-      background: #ff5050;
-      color: #fff;
-      transform: scale(1.1);
-    }
-
-    /* Кнопка "Выйти" в шапке */
-    .nav a.logout-link {
-      color: #ff8b8b;
-    }
-
-    .nav a.logout-link:hover {
-      color: #ff5050;
-    }
+    
     /* ================= ПРОФИЛЬ (ДИЗАЙН СО СКРИНШОТА) ================= */
     
     /* Скрываем профиль по умолчанию */
@@ -1059,6 +1016,50 @@
                 link.href = '#';
                 link.onclick = (e) => { e.preventDefault(); showPage('profile'); };
             }
+           /* Кнопка удаления записи */
+    .service-item-profile {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .service-item-profile .service-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .delete-btn {
+      background: rgba(255, 80, 80, 0.15);
+      border: 1px solid rgba(255, 80, 80, 0.5);
+      color: #ff8b8b;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
+      flex-shrink: 0;
+    }
+
+    .delete-btn:hover {
+      background: #ff5050;
+      color: #fff;
+      transform: scale(1.1);
+    }
+
+    /* Кнопка "Выйти" в шапке */
+    .nav a.logout-link {
+      color: #ff8b8b;
+    }
+
+    .nav a.logout-link:hover {
+      color: #ff5050;
+    }
         });
 
         // Кнопка "Записаться" на главной
