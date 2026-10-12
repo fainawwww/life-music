@@ -870,16 +870,169 @@
   </main>
 
   <script>
-    // Небольшой эффект при прокрутке:
-    // шапка становится чуть темнее.
-    const header = document.querySelector(".header");
+        // ================= ЛОГИКА САЙТА =================
+    
+    // Данные пользователя (по умолчанию)
+    let userData = {
+        name: "Екатерина Симахина",
+        email: "vashapochta@mail.com",
+        phone: "+79806545342",
+        avatar: null,
+        services: []
+    };
 
-    window.addEventListener("scroll", () => {
-      if (window.scrollY > 30) {
-        header.style.background = "rgba(2, 8, 28, 0.98)";
-      } else {
-        header.style.background = "rgba(3, 12, 36, 0.94)";
-      }
+    // Загрузка данных из localStorage при старте
+    function loadUserData() {
+        const saved = localStorage.getItem('alywawes_user');
+        if (saved) {
+            userData = JSON.parse(saved);
+        }
+        updateProfileUI();
+    }
+
+    // Сохранение данных
+    function saveUserData() {
+        localStorage.setItem('alywawes_user', JSON.stringify(userData));
+    }
+
+    // Переключение страниц (Главная / Профиль / Услуги)
+    function showPage(pageName) {
+        const mainContent = document.querySelector('main');
+        const heroSection = document.querySelector('.hero');
+        const aboutSections = document.querySelectorAll('.about');
+        const profilePage = document.getElementById('profile-page');
+        const servicesPage = document.getElementById('services-page');
+
+        // Скрываем всё
+        heroSection.style.display = 'none';
+        aboutSections.forEach(s => s.style.display = 'none');
+        profilePage.style.display = 'none';
+        servicesPage.style.display = 'none';
+
+        if (pageName === 'home') {
+            heroSection.style.display = 'flex';
+            aboutSections.forEach(s => s.style.display = 'block');
+        } else if (pageName === 'profile') {
+            profilePage.style.display = 'block';
+        } else if (pageName === 'services') {
+            servicesPage.style.display = 'block';
+        }
+        window.scrollTo(0, 0);
+    }
+
+    // Обновление интерфейса профиля
+    function updateProfileUI() {
+        document.getElementById('greetingName').innerText = userData.name.split(' ')[0];
+        document.getElementById('displayFullName').innerText = userData.name;
+        document.getElementById('displayEmail').innerText = userData.email;
+        document.getElementById('displayPhone').innerText = userData.phone;
+
+        // Аватар
+        const avatarDiv = document.getElementById('avatarDisplay');
+        if (userData.avatar) {
+            avatarDiv.style.backgroundImage = `url(${userData.avatar})`;
+            avatarDiv.innerText = '';
+        } else {
+            avatarDiv.style.backgroundImage = 'none';
+            avatarDiv.innerText = '👤';
+        }
+
+        // Статистика
+        const count = userData.services.length;
+        document.getElementById('activeCount').innerText = count;
+        
+        if (count > 0) {
+            document.getElementById('nextDate').innerText = userData.services[count - 1].date;
+        } else {
+            document.getElementById('nextDate').innerText = '--.--.--';
+        }
+
+        // Список услуг
+        const listContainer = document.getElementById('myServicesList');
+        listContainer.innerHTML = '';
+        
+        if (count === 0) {
+            listContainer.innerHTML = '<p style="color: #a0b4c8; font-style: italic;">У вас пока нет записей. Выберите услугу в разделе "Услуги".</p>';
+        } else {
+            userData.services.forEach(service => {
+                const item = document.createElement('div');
+                item.className = 'service-item-profile';
+                item.innerHTML = `
+                    <span>${service.name}</span>
+                    <span class="price">${service.price}</span>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+    }
+
+    // Добавление услуги
+    function addService(name, price) {
+        const date = new Date().toLocaleDateString('ru-RU');
+        userData.services.push({ name, price, date });
+        saveUserData();
+        updateProfileUI();
+        alert(`Услуга "${name}" добавлена в профиль!`);
+        showPage('profile');
+    }
+
+    // Загрузка аватара
+    function uploadAvatar(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                userData.avatar = e.target.result;
+                saveUserData();
+                updateProfileUI();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUserData();
+
+        // Находим ссылки в меню и вешаем на них события
+        const navLinks = document.querySelectorAll('.nav a');
+        
+        navLinks.forEach(link => {
+            const text = link.innerText.trim();
+            
+            // Главная
+            if (text === 'Главная') {
+                link.href = '#';
+                link.onclick = (e) => { e.preventDefault(); showPage('home'); };
+            }
+            // Услуги
+            if (text === 'Услуги') {
+                link.href = '#';
+                link.onclick = (e) => { e.preventDefault(); showPage('services'); };
+            }
+            // Логотип (ведет на главную или в профиль, если нажать)
+            if (link.classList.contains('logo')) {
+                link.href = '#';
+                link.onclick = (e) => { e.preventDefault(); showPage('profile'); };
+            }
+        });
+
+        // Кнопка "Записаться" на главной
+        const bookingBtn = document.querySelector('.booking-btn');
+        if (bookingBtn) {
+            bookingBtn.href = '#';
+            bookingBtn.onclick = (e) => { e.preventDefault(); showPage('services'); };
+        }
+
+        // Эффект прокрутки для шапки (ваш старый код)
+        const header = document.querySelector(".header");
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 30) {
+                header.style.background = "rgba(2, 8, 28, 0.98)";
+            } else {
+                header.style.background = "rgba(3, 12, 36, 0.94)";
+            }
+        });
     });
   </script>
 
