@@ -1032,7 +1032,16 @@
             } else {
                 header.style.background = "rgba(3, 12, 36, 0.94)";
             }
-        });
+          // Небольшой эффект при прокрутке:
+    // шапка становится чуть темнее.
+    const header = document.querySelector(".header");
+
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 30) {
+        header.style.background = "rgba(2, 8, 28, 0.98)";
+      } else {
+        header.style.background = "rgba(3, 12, 36, 0.94)";
+      }
     });
   </script>
 
